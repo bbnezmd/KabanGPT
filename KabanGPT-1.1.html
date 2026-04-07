@@ -1,0 +1,489 @@
+<!--
+====================================
+KabanGPT v1.1
+Автор: bbnez
+Создано: 27.03.2025
+Лицензия: только для подписчиков канала
+====================================
+-->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KabanGPT 1.1 by bbnez</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 80vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Шапка чата */
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* Область сообщений */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        /* Сообщения */
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Аватарки */
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin: 0 10px;
+        }
+
+        .user .avatar {
+            order: 2;
+            background: #667eea;
+            color: white;
+        }
+
+        .ai .avatar {
+            background: #764ba2;
+            color: white;
+        }
+
+        /* Индикатор печатания */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .typing-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Область ввода */
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Статус */
+        .status {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #999;
+            background: #f8f9fa;
+        }
+
+        /* Скроллбар */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>KabanGPT by bbnez</h1>
+            <p>Локальный AI ассистент на твоем компьютере, сделанный bbnez</p>
+            <p>Авторские права у bbnez. Копирование и рассылка проекта запрещена.</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <!-- Приветственное сообщение -->
+            <div class="message ai">
+                <div class="avatar">🤖</div>
+                <div class="message-content">
+                    Привет! Я KabanGPT by bbnez, локальный AI ассистент.<br>
+                    Задавай любые вопросы, и я постараюсь помочь! 😊
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="messageInput" placeholder="Введи сообщение..." autofocus>
+            <button class="send-button" id="sendButton">📤 Отправить</button>
+        </div>
+        <div class="status" id="status">✅ Готов к работе</div>
+    </div>
+
+    <script>
+        // Конфигурация
+        const OLLAMA_URL = 'http://localhost:11434/api/generate';
+        const MODEL = 'deepseek-r1:7b';
+        const SYSTEM_PROMPT = 'Ты полезный, дружелюбный и эмпатичный AI-ассистент. Отвечай на русском языке, будь вежливым и помогай пользователю.';
+
+        // Элементы DOM
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const statusDiv = document.getElementById('status');
+
+        // История сообщений (для контекста)
+        let conversationHistory = [];
+
+        // Функция добавления сообщения в чат
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = sender === 'user' ? '👤' : '🤖';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = text;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Прокрутка вниз
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Сохраняем в историю
+            conversationHistory.push({ role: sender, content: text });
+            
+            // Ограничиваем историю последними 20 сообщениями
+            if (conversationHistory.length > 20) {
+                conversationHistory.shift();
+            }
+        }
+
+        // Функция показа/скрытия индикатора печатания
+        let typingIndicator = null;
+        
+        function showTypingIndicator() {
+            hideTypingIndicator();
+            
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.className = 'message ai typing-indicator';
+            indicatorDiv.id = 'typingIndicator';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = '🤖';
+            
+            const dots = document.createElement('div');
+            dots.className = 'typing-dots';
+            dots.innerHTML = '<span></span><span></span><span></span>';
+            
+            indicatorDiv.appendChild(avatar);
+            indicatorDiv.appendChild(dots);
+            
+            chatMessages.appendChild(indicatorDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            typingIndicator = indicatorDiv;
+        }
+        
+        function hideTypingIndicator() {
+            if (typingIndicator) {
+                typingIndicator.remove();
+                typingIndicator = null;
+            }
+        }
+
+        // Отправка сообщения к DeepSeek через Ollama
+        async function sendToDeepSeek(message) {
+            try {
+                // Подготавливаем контекст из истории
+                const context = conversationHistory
+                    .filter(msg => msg.role !== 'system')
+                    .map(msg => `${msg.role === 'user' ? 'Пользователь' : 'AI'}: ${msg.content}`)
+                    .join('\n');
+                
+                const fullPrompt = `${SYSTEM_PROMPT}\n\n${context}\nПользователь: ${message}\nAI:`;
+                
+                const response = await fetch(OLLAMA_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: MODEL,
+                        prompt: message,
+                        system: SYSTEM_PROMPT,
+                        temperature: 0.7,
+                        max_tokens: 2048,
+                        stream: false
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ошибка: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.response;
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                throw new Error('Не удалось подключиться к Ollama. Убедись, что Ollama запущен.');
+            }
+        }
+
+        // Основная функция отправки сообщения
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Очищаем поле ввода
+            messageInput.value = '';
+            
+            // Добавляем сообщение пользователя
+            addMessage(message, 'user');
+            
+            // Показываем индикатор печатания
+            showTypingIndicator();
+            
+            // Обновляем статус
+            statusDiv.textContent = '🤔 Думаю...';
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+            
+            try {
+                // Отправляем запрос к DeepSeek
+                const aiResponse = await sendToDeepSeek(message);
+                
+                // Скрываем индикатор
+                hideTypingIndicator();
+                
+                // Добавляем ответ AI
+                addMessage(aiResponse, 'ai');
+                
+                // Обновляем статус
+                statusDiv.textContent = '✅ Готов к работе';
+                
+            } catch (error) {
+                // Скрываем индикатор
+                hideTypingIndicator();
+                
+                // Показываем ошибку
+                addMessage(`❌ Ошибка: ${error.message}`, 'ai');
+                statusDiv.textContent = '❌ Ошибка подключения к Ollama';
+                console.error(error);
+                
+            } finally {
+                // Включаем поля обратно
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // Обработчики событий
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Фокус на поле ввода при загрузке
+        messageInput.focus();
+        
+        // Проверка подключения к Ollama при загрузке
+        async function checkOllamaConnection() {
+            try {
+                const response = await fetch('http://localhost:11434/api/tags');
+                if (response.ok) {
+                    const data = await response.json();
+                    const models = data.models.map(m => m.name).join(', ');
+                    statusDiv.textContent = `✅ Ollama подключен. Доступные модели: ${models}`;
+                } else {
+                    statusDiv.textContent = '⚠️ Ollama запущен, но не отвечает';
+                }
+            } catch (error) {
+                statusDiv.textContent = '⚠️ Ollama не запущен. Запусти: ollama serve';
+            }
+        }
+        
+        // Проверяем подключение через секунду после загрузки
+        setTimeout(checkOllamaConnection, 1000);
+    </script>
+</body>
+</html>
